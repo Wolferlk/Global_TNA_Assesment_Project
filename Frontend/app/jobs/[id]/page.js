@@ -3,16 +3,18 @@
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { apiRequest, statuses } from "../../../lib/api";
+import { apiRequest, getUser, statuses } from "../../../lib/api";
 
 export default function JobDetailPage() {
   const { id } = useParams();
   const router = useRouter();
   const [job, setJob] = useState(null);
+  const [user, setUser] = useState(null);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
+    setUser(getUser());
     setError("");
     apiRequest(`/api/jobs/${id}`)
       .then(setJob)
@@ -69,24 +71,30 @@ export default function JobDetailPage() {
 
       {job && (
         <section className="detail">
-          <span className={badgeClass(job.status)}>{job.status}</span>
-          <h2>{job.title}</h2>
-          <p>{job.description}</p>
-
-          <div className="meta">
-            <span>{job.category || "Uncategorised"}</span>
-            <span>|</span>
-            <span>{job.location || "No location"}</span>
-            <span>|</span>
-            <span>{new Date(job.createdAt).toLocaleDateString()}</span>
+          <div className="detail-head">
+            <span className={badgeClass(job.status)}>{job.status}</span>
+            <span className="date">Created {new Date(job.createdAt).toLocaleDateString()}</span>
           </div>
+          <h2>{job.title}</h2>
+          <p className="description">{job.description}</p>
 
-          <div>
-            <strong>Contact</strong>
-            <p>
-              {job.contactName || "No name provided"}
-              {job.contactEmail ? ` · ${job.contactEmail}` : ""}
-            </p>
+          <div className="info-grid">
+            <div>
+              <span>Category</span>
+              <strong>{job.category || "Uncategorised"}</strong>
+            </div>
+            <div>
+              <span>Location</span>
+              <strong>{job.location || "No location"}</strong>
+            </div>
+            <div>
+              <span>Contact</span>
+              <strong>{job.contactName || "No name provided"}</strong>
+            </div>
+            <div>
+              <span>Email</span>
+              {job.contactEmail ? <a href={`mailto:${job.contactEmail}`}>{job.contactEmail}</a> : <strong>No email provided</strong>}
+            </div>
           </div>
 
           <div className="field">
@@ -100,10 +108,35 @@ export default function JobDetailPage() {
             </select>
           </div>
 
+          <div className="status-actions" aria-label="Quick status actions">
+            {statuses.map((item) => (
+              <button
+                className={item === job.status ? "status-pill active" : "status-pill"}
+                disabled={busy || item === job.status}
+                key={item}
+                onClick={() => updateStatus({ target: { value: item } })}
+                type="button"
+              >
+                {item}
+              </button>
+            ))}
+          </div>
+
           <div className="actions">
-            <button className="button danger" onClick={deleteJob} disabled={busy} type="button">
-              Delete request
-            </button>
+            {job.contactEmail && (
+              <a className="button secondary" href={`mailto:${job.contactEmail}?subject=${encodeURIComponent(job.title)}`}>
+                Email homeowner
+              </a>
+            )}
+            {user ? (
+              <button className="button danger" onClick={deleteJob} disabled={busy} type="button">
+                Delete request
+              </button>
+            ) : (
+              <Link className="button secondary" href="/login">
+                Login to delete
+              </Link>
+            )}
           </div>
         </section>
       )}

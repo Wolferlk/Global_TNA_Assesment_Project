@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
-import { apiRequest, categories } from "../../../lib/api";
+import { useEffect, useState } from "react";
+import { apiRequest, categories, getToken } from "../../../lib/api";
 
 const initialForm = {
   title: "",
@@ -19,6 +19,16 @@ export default function NewJobPage() {
   const [form, setForm] = useState(initialForm);
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
+  const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    if (!getToken()) {
+      router.push("/login");
+      return;
+    }
+
+    setReady(true);
+  }, [router]);
 
   function updateField(event) {
     setForm((current) => ({
@@ -66,6 +76,9 @@ export default function NewJobPage() {
         </Link>
       </header>
 
+      {!ready ? (
+        <div className="empty">Checking login...</div>
+      ) : (
       <form className="form" onSubmit={submitJob}>
         {error && <div className="error">{error}</div>}
 
@@ -113,6 +126,7 @@ export default function NewJobPage() {
           </button>
         </div>
       </form>
+      )}
     </main>
   );
 }

@@ -1,6 +1,6 @@
 # Mini Service Request Board
 
-A small full-stack app where homeowners can post service requests and tradespeople can browse, update, or delete them.
+A small full-stack app where homeowners can post service requests and tradespeople can browse, search, update, or delete them.
 
 ## Tech Stack
 
@@ -9,6 +9,17 @@ A small full-stack app where homeowners can post service requests and tradespeop
 - Database: MongoDB
 - ODM: Mongoose
 - Styling: Plain CSS
+
+## Features
+
+- Light and dark theme with saved preference
+- Job dashboard with status summary cards
+- Search across title and description
+- Category and status filters
+- Client-side sorting by newest, oldest, status, or category
+- Job detail page with quick status actions and email contact link
+- JWT login/register flow
+- Optional Google login when Google OAuth credentials are configured
 
 ## Project Structure
 
@@ -23,15 +34,20 @@ Create `Backend/.env`:
 
 ```env
 PORT=4000
-MONGODB_URI=mongodb+srv://sasiofficial25_db_user:99IXD5Ijb86zQLuf@cluster0.yb8drrc.mongodb.net/?appName=Cluster0
+MONGODB_URI=your_mongodb_connection_string
 FRONTEND_URL=http://localhost:3000
+JWT_SECRET=replace_with_a_long_random_secret
+GOOGLE_CLIENT_ID=optional_google_oauth_client_id
 ```
 
 Create `Frontend/.env.local`:
 
 ```env
 NEXT_PUBLIC_API_URL=http://localhost:4000
+NEXT_PUBLIC_GOOGLE_CLIENT_ID=optional_google_oauth_client_id
 ```
+
+`GOOGLE_CLIENT_ID` and `NEXT_PUBLIC_GOOGLE_CLIENT_ID` must be the same OAuth client ID if Google login is enabled.
 
 ## Setup
 
@@ -69,13 +85,26 @@ After setting `Backend/.env`, run:
 npm run seed --prefix Backend
 ```
 
+This inserts 40 jobs: 10 Plumbing, 10 Electrical, 10 Painting, and 10 Joinery.
+
+## Tests
+
+Run backend CRUD and auth tests:
+
+```bash
+npm test --prefix Backend
+```
+
 ## API Endpoints
 
-- `GET /api/jobs` - list jobs, supports `?category=Plumbing` and `?status=Open`
+- `POST /api/auth/register` - create an account and return a JWT
+- `POST /api/auth/login` - login with email/password and return a JWT
+- `POST /api/auth/google` - login with a Google ID token and return a JWT
+- `GET /api/jobs` - list jobs, supports `?category=Plumbing`, `?status=Open`, and `?search=tap`
 - `GET /api/jobs/:id` - get one job
-- `POST /api/jobs` - create a job
+- `POST /api/jobs` - create a job, requires `Authorization: Bearer <token>`
 - `PATCH /api/jobs/:id` - update status only
-- `DELETE /api/jobs/:id` - delete a job
+- `DELETE /api/jobs/:id` - delete a job, requires `Authorization: Bearer <token>`
 
 ## JobRequest Fields
 
@@ -87,3 +116,28 @@ npm run seed --prefix Backend
 - `contactEmail` valid email format
 - `status` one of `Open`, `In Progress`, `Closed`
 - `createdAt` auto-created date
+
+## Deployment
+
+### Backend on Render
+
+1. Push the repository to GitHub.
+2. Create a new Render Web Service.
+3. Set the root directory to `Backend`.
+4. Build command: `npm install`.
+5. Start command: `npm start`.
+6. Add environment variables:
+   `MONGODB_URI`, `JWT_SECRET`, `FRONTEND_URL`, and optional `GOOGLE_CLIENT_ID`.
+
+`Backend/render.yaml` is included if you prefer Render Blueprint setup.
+
+### Frontend on Vercel
+
+1. Import the GitHub repository in Vercel.
+2. Set the project root directory to `Frontend`.
+3. Add environment variables:
+   `NEXT_PUBLIC_API_URL=https://your-render-backend-url`
+   and optional `NEXT_PUBLIC_GOOGLE_CLIENT_ID`.
+4. Deploy.
+
+After Vercel deploys, update Render's `FRONTEND_URL` to the Vercel URL. For multiple frontend origins, separate them with commas.

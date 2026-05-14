@@ -1,5 +1,6 @@
 import express from "express";
 import mongoose from "mongoose";
+import { requireAuth } from "../middleware/auth.js";
 import { JobRequest } from "../models/JobRequest.js";
 
 const router = express.Router();
@@ -11,6 +12,10 @@ router.get("/", async (req, res, next) => {
 
     if (req.query.category) filter.category = req.query.category;
     if (req.query.status) filter.status = req.query.status;
+    if (req.query.search) {
+      const search = new RegExp(escapeRegex(req.query.search), "i");
+      filter.$or = [{ title: search }, { description: search }];
+    }
 
     const jobs = await JobRequest.find(filter).sort({ createdAt: -1 });
     res.json(jobs);
@@ -34,7 +39,7 @@ router.get("/:id", async (req, res, next) => {
   }
 });
 
-router.post("/", async (req, res, next) => {
+router.post("/", requireAuth, async (req, res, next) => {
   try {
     const job = await JobRequest.create({
       title: req.body.title,
@@ -75,7 +80,7 @@ router.patch("/:id", async (req, res, next) => {
   }
 });
 
-router.delete("/:id", async (req, res, next) => {
+router.delete("/:id", requireAuth, async (req, res, next) => {
   try {
     if (!mongoose.isValidObjectId(req.params.id)) {
       return res.status(404).json({ message: "Job not found" });
@@ -89,5 +94,9 @@ router.delete("/:id", async (req, res, next) => {
     next(error);
   }
 });
+
+function escapeRegex(value) {
+  return String(value).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
 
 export default router;

@@ -2,51 +2,73 @@ import "dotenv/config";
 import { connectDb } from "./config/db.js";
 import { JobRequest } from "./models/JobRequest.js";
 
-const jobs = [
-  {
-    title: "Leaking kitchen tap",
-    description: "Need a plumber to fix a leaking tap under the kitchen sink.",
-    category: "Plumbing",
-    location: "Glasgow",
-    contactName: "Maya Fraser",
-    contactEmail: "maya@example.com"
-  },
-  {
-    title: "Replace hallway light fitting",
-    description: "Old pendant light needs replacing with a new fixture.",
-    category: "Electrical",
-    location: "Edinburgh",
-    contactName: "Callum Reid",
-    contactEmail: "callum@example.com"
-  },
-  {
-    title: "Paint small bedroom",
-    description: "Bedroom walls need a fresh coat of paint before next weekend.",
-    category: "Painting",
-    location: "Glasgow",
-    contactName: "Aisha Khan",
-    contactEmail: "aisha@example.com"
-  },
-  {
-    title: "Fix sticking garden gate",
-    description: "Wooden gate is scraping the ground and needs adjusted.",
-    category: "Joinery",
-    location: "Paisley",
-    contactName: "Ross Taylor",
-    contactEmail: "ross@example.com"
-  },
-  {
-    title: "Install outdoor socket",
-    description: "Looking for an electrician to install a weatherproof garden socket.",
-    category: "Electrical",
-    location: "Stirling",
-    contactName: "Nina Clark",
-    contactEmail: "nina@example.com"
-  }
-];
+const sampleRequests = {
+  Plumbing: [
+    "Leaking kitchen tap",
+    "Blocked bathroom sink",
+    "Low water pressure",
+    "Running toilet repair",
+    "Burst outdoor pipe",
+    "New dishwasher connection",
+    "Radiator valve replacement",
+    "Shower mixer repair",
+    "Kitchen drain smell",
+    "Bathroom pipe inspection"
+  ],
+  Electrical: [
+    "Replace hallway light fitting",
+    "Install outdoor socket",
+    "Fix tripping breaker",
+    "Bedroom plug socket repair",
+    "Kitchen extractor wiring",
+    "Garage light installation",
+    "Smart thermostat wiring",
+    "Bathroom fan replacement",
+    "Garden lighting fault",
+    "Consumer unit check"
+  ],
+  Painting: [
+    "Paint small bedroom",
+    "Refresh living room walls",
+    "Paint hallway and stairs",
+    "Touch up kitchen ceiling",
+    "Exterior door repaint",
+    "Fence painting",
+    "Nursery wall repaint",
+    "Bathroom mould paint",
+    "Office feature wall",
+    "Window frame painting"
+  ],
+  Joinery: [
+    "Fix sticking garden gate",
+    "Repair loose stair tread",
+    "Build airing cupboard shelves",
+    "Replace internal door",
+    "Fit skirting boards",
+    "Repair kitchen cabinet hinge",
+    "Install loft hatch trim",
+    "Build alcove shelves",
+    "Fix wooden floorboard",
+    "Replace garden decking board"
+  ]
+};
+
+const locations = ["Glasgow", "Edinburgh", "Paisley", "Stirling", "Hamilton"];
+const names = ["Maya Fraser", "Callum Reid", "Aisha Khan", "Ross Taylor", "Nina Clark"];
+
+const jobs = Object.entries(sampleRequests).flatMap(([category, titles]) =>
+  titles.map((title, index) => ({
+    title,
+    description: `${title} needed at a homeowner property. Please inspect and quote for the work.`,
+    category,
+    location: locations[index % locations.length],
+    contactName: names[index % names.length],
+    contactEmail: `homeowner${category.toLowerCase()}${index + 1}@example.com`
+  }))
+);
 
 await connectDb();
 await JobRequest.deleteMany({});
 await JobRequest.insertMany(jobs);
-console.log("Seeded job requests");
+console.log(`Seeded ${jobs.length} job requests`);
 process.exit(0);
