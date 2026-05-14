@@ -1,9 +1,10 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+const API_URL = normalizeBaseUrl(process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000");
 
 export async function apiRequest(path, options = {}) {
   const token = getToken();
+  const cleanPath = path.startsWith("/") ? path : `/${path}`;
 
-  const response = await fetch(`${API_URL}${path}`, {
+  const response = await fetch(`${API_URL}${cleanPath}`, {
     ...options,
     headers: {
       "Content-Type": "application/json",
@@ -24,6 +25,10 @@ export async function apiRequest(path, options = {}) {
 
 export const categories = ["Plumbing", "Electrical", "Painting", "Joinery"];
 export const statuses = ["Open", "In Progress", "Closed"];
+
+function normalizeBaseUrl(url) {
+  return url.replace(/\/+$/, "");
+}
 
 export function saveAuth(auth) {
   localStorage.setItem("auth", JSON.stringify(auth));

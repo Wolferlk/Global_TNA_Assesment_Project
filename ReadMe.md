@@ -35,7 +35,7 @@ Create `Backend/.env`:
 ```env
 PORT=4000
 MONGODB_URI=your_mongodb_connection_string
-FRONTEND_URL=http://localhost:3000
+FRONTEND_URL=http://localhost:3000,https://gnta-sigma.vercel.app
 JWT_SECRET=replace_with_a_long_random_secret
 GOOGLE_CLIENT_ID=optional_google_oauth_client_id
 ```
@@ -43,7 +43,7 @@ GOOGLE_CLIENT_ID=optional_google_oauth_client_id
 Create `Frontend/.env.local`:
 
 ```env
-NEXT_PUBLIC_API_URL=http://localhost:4000
+NEXT_PUBLIC_API_URL=https://global-tna-assesment-project.vercel.app
 NEXT_PUBLIC_GOOGLE_CLIENT_ID=optional_google_oauth_client_id
 ```
 
